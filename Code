@@ -1,0 +1,219 @@
+import openpyxl
+import tkinter as tk
+import random
+import openai
+import spacy
+
+
+nlp = spacy.load("en_core_web_sm")
+openai.api_key = "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"
+
+# Create a Tkinter window
+window = tk.Tk()
+window.title("Fitness Supplement Recommendation")
+
+# Create a label for the preferred method of working out
+method_label = tk.Label(window, text="Preferred Method of Working Out:")
+method_label.grid(row=0, column=0)
+
+# Create a dropdown menu for the preferred method of working out
+method_options = ['Running', 'Weightlifting', 'Swimming', 'HIT', 'Agility/Sprinting', 'Biking', 'Football', 'Basketball', 'Soccer', 'Rowing', 'Combat Sports']
+method_var = tk.StringVar()
+method_var.set(method_options[0])
+method_dropdown = tk.OptionMenu(window, method_var, *method_options)
+method_dropdown.grid(row=0, column=1)
+
+# Create a label for the fitness goals
+goal_label = tk.Label(window, text="Fitness Goals:")
+goal_label.grid(row=1, column=0)
+
+# Create a dropdown menu for the fitness goals
+goal_options = ['Gain Mass', 'Improve Endurance', 'Improve Strength', 'Improve Athletic Ability']
+goal_var = tk.StringVar()
+goal_var.set(goal_options[0])
+goal_dropdown = tk.OptionMenu(window, goal_var, *goal_options)
+goal_dropdown.grid(row=1, column=1)
+
+# Create a text box for the output
+output_box = tk.Text(window, height=10, wrap='word')
+output_box.grid(row=3, columnspan=2)
+
+def get_recommendations():
+    # Load the Excel workbook and select the default sheet (Sheet1)
+    workbook = openpyxl.load_workbook('/Users/loganwehrman/Desktop/Thesis Code/Book3.xlsx')
+    worksheet = workbook['Sheet1']
+    
+    output_box.delete(1.0, tk.END) # clear the output box
+    
+    # Get user inputs
+    method = method_var.get()
+    goal = goal_var.get()
+    
+    # Access the data in the workbook as needed
+    for row in worksheet.iter_rows():
+        if row[0].value == goal or row[0].value == method:
+            values = [] # list to hold non-repeating cell values
+            for i in range(5): # get 5 random non-repeating cells
+                cell = random.choice(row[1:]) # exclude the first cell with method/goal
+                while cell.value in values or cell.value is None: # keep getting cells until a non-repeating one is found
+                    cell = random.choice(row[1:])
+                values.append(cell.value)
+            
+            # Add the values to the output box as buttons
+            output_box.insert(tk.END, f"{row[0].value}\n")
+            for val in values:
+                if val is not None:
+                    button = tk.Button(output_box, text=val, command=lambda v=val: button_click(v))
+                    button_width = len(val) + 2 # calculate the width of the button based on the length of the text value
+                    output_box.window_create(tk.END, window=button)
+                    button.config(width=button_width) # set the width of the button widget
+                    output_box.insert(tk.END, "\n")
+
+
+# Create a button that calls the get_recommendations function when clicked
+get_recommendations_button = tk.Button(window, text="Get Recommendations", command=get_recommendations)
+get_recommendations_button.grid(row=2, columnspan=2)
+
+def button_click(value):
+    def open_chatbot_window():
+        # Create a new tkinter window for the research articles
+        article_window = tk.Toplevel()
+        article_window.geometry("400x400")
+        article_window.title("Fitness Supplement Research Articles")
+
+        # Create a label for the article links
+        article_label = tk.Label(article_window, text="Research Articles:")
+        article_label.pack()
+
+        # Create a text box for displaying the article links
+        article_box = tk.Text(article_window, height=10, wrap='word')
+        article_box.pack()
+
+
+        # Insert some example article links with descriptions
+        # Insert example article links with descriptions
+        article_box.insert(tk.END, "Common questions and misconceptions about creatine supplementation: what does the scientific evidence really show?\nhttps://jissn.biomedcentral.com/articles/10.1186/s12970-021-00412-w\n\n")
+        article_box.insert(tk.END, "Creatine supplementation with specific view to exercise/sports performance: an update\nhttps://www.ncbi.nlm.nih.gov/pmc/articles/PMC3407788/?report=reader\n\n")
+        article_box.insert(tk.END, "Effects of Protein Supplementation on Performance and Recovery in Resistance and Endurance Training\nhttps://www.ncbi.nlm.nih.gov/pmc/articles/PMC6142015/\n\n")
+        article_box.insert(tk.END, "Nutraceutical Effects of Branched-Chain Amino Acids on Skeletal Muscle\nhttps://www.sciencedirect.com/science/article/pii/S0022316622080944\n\n")
+        article_box.insert(tk.END, "A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults\nhttps://pubmed.ncbi.nlm.nih.gov/28698222/\n\n")
+        article_box.insert(tk.END, "Overview of numerous fitness supplements and their purported benefits\nhttps://healthjade.com/zma-supplement/\n\n")
+        article_box.insert(tk.END, "International Society of Sports Nutrition position stand: safety and efficacy of creatine supplementation in exercise, sport, and medicine\nhttps://doi.org/10.1186/s12970-017-0173-z\n\n")
+        article_box.insert(tk.END, "Wake up and smell the coffee: caffeine supplementation and exercise performance-an umbrella review of 21 published meta-analyses\nhttps://pubmed.ncbi.nlm.nih.gov/30926628/\n\n")
+        article_box.insert(tk.END, "Acute Effects of Citrulline Supplementation on High-Intensity Strength and Power Performance: A Systematic Review and Meta-Analysis\nhttps://pubmed.ncbi.nlm.nih.gov/30895562/\n\n")
+        article_box.insert(tk.END, "Link to NIH Dietary Supplement fact sheet\nhttps://ods.od.nih.gov/factsheets/list-all/\n\n")
+        article_box.insert(tk.END, "Dietary Supplements for Exercise and Athletic Performance Fact Sheet for Consumers (NIH)\nhttps://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-Consumer/\n\n")
+        article_box.insert(tk.END, "Effects of arachidonic acid supplementation on training adaptations in resistance-trained males\nhttps://www.ncbi.nlm.nih.gov/pmc/articles/PMC2217562/\n\n")
+        article_box.insert(tk.END, "The Effect of Consuming Carbohydrate With and Without Protein on the Rate of Muscle Glycogen Re-synthesis During Short-Term Post-exercise Recovery: a Systematic Review and Meta-analysis\nhttps://pubmed.ncbi.nlm.nih.gov/33507402/\n\n")
+ 
+   
+        # Create a new tkinter window
+        chatbot_window = tk.Tk()
+        chatbot_window.geometry("400x400")
+        chatbot_window.title("Fitness Supplement Chatbot")
+        
+        # Create a label to greet the user
+        greeting_label = tk.Label(chatbot_window, text="Hello, I am a fitness supplement chatbot. Copy and paste text into the middle box from the research articles example research articles or from your own findings.")
+        greeting_label.pack()
+
+        # Create a label for the chat log
+        log_label = tk.Label(chatbot_window, text="Chat Log:")
+        log_label.pack()
+    
+        # Create a text box for displaying the chat messages
+        chat_log = tk.Text(chatbot_window, height=10, wrap='word')
+        chat_log.pack()
+    
+        # Create a label for the input field
+        input_label = tk.Label(chatbot_window, text="Paste the article text here:")
+        input_label.pack()
+    
+        # Create a text box for the user to input text
+        input_box = tk.Text(chatbot_window, height=10, wrap='word')
+        input_box.pack()
+    
+        # Create an entry field for the user to input their questions
+        question_field = tk.Entry(chatbot_window)
+        question_field.pack()
+        
+    
+        # Define a function to handle sending user input and receiving bot responses
+        def send_message():
+            # Get the user's input from the text box or question field
+            input_text = input_box.get(1.0, tk.END).strip()
+            question = question_field.get()
+    
+            # Clear the input field
+            input_box.delete(1.0, tk.END)
+            question_field.delete(0, tk.END)
+    
+            # If the user types "exit", close the window
+            if question.lower() == "exit":
+                chatbot_window.destroy()
+                return
+            # Generate a summary of the text using OpenAI's GPT-3 API
+            if input_text:
+                response = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=(f"Summarize the following text in 5 or less sentences:\n{input_text}\n\nSummary:"),
+                    temperature=0.5,
+                    max_tokens=100,
+                    top_p=1,
+                    frequency_penalty=0,
+                    presence_penalty=0
+                )
+                summary = response.choices[0].text.strip()
+                
+                # Display the summary in the chat log
+                chat_log.insert(tk.END, f"Text Summary: {summary}\n")
+            else:
+                chat_log.insert(tk.END, f"No text detected.\n")
+
+        
+            # Get the bot's response to the user's question
+            answer = generate_text(question)
+    
+            # Display the user's question and the bot's response in the chat log
+            chat_log.insert(tk.END, f"User: {question}\n")
+            chat_log.insert(tk.END, f"Bot: {answer}\n")
+    
+            # If the bot's response prompts a follow-up question, continue the conversation
+            while "?" in answer:
+                followup = input("You can ask a follow-up question now: ")
+                answer = generate_text(followup)
+                chat_log.insert(tk.END, f"User: {followup}\n")
+                chat_log.insert(tk.END, f"Bot: {answer}\n")
+    
+        # Create a button to send the user's message
+        send_button = tk.Button(chatbot_window, text="Send", command=send_message)
+        send_button.pack()
+
+
+    open_chatbot_window()
+
+def generate_text(prompt):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=1000,
+        n=1,
+        stop=None,
+        temperature=0.4,
+    )
+
+    text = response.choices[0].text
+    while len(response.choices[0].text) == 250:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt + text,
+            max_tokens=100,
+            n=1,
+            stop=None,
+            temperature=0.4,
+        )
+        text += response.choices[0].text
+
+    return text.strip()
+
+window.mainloop()
+    

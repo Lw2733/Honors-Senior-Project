@@ -6,7 +6,7 @@ import spacy
 
 
 nlp = spacy.load("en_core_web_sm")
-openai.api_key = "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"
+openai.api_key = "Your Key Here"
 
 # Create a Tkinter window
 window = tk.Tk()
@@ -40,7 +40,7 @@ output_box.grid(row=3, columnspan=2)
 
 def get_recommendations():
     # Load the Excel workbook and select the default sheet (Sheet1)
-    workbook = openpyxl.load_workbook('/Users/loganwehrman/Desktop/Thesis Code/Book3.xlsx')
+    workbook = openpyxl.load_workbook('/Users/loganwehrman/Desktop/Thesis Code/Supplement_db.xlsx')
     worksheet = workbook['Sheet1']
     
     output_box.delete(1.0, tk.END) # clear the output box
